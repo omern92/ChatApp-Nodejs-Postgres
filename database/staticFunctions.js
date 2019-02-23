@@ -40,8 +40,8 @@ module.exports = {
       var result = await pool.query(sql, username);
     
       if (result.length > 0) {
-        let hashedPass = result[0].password;
-        let room       = result[0].room;
+        let hashedPass = result.rows[0].password;
+        let room       = result.rows[0].room;
         if (bcrypt.compareSync(password, hashedPass)) {
                 this.userConnected(username);
                 return { success: true, username: username, room: room };
