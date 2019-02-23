@@ -1,4 +1,4 @@
-var pool = require('./database');
+var pool = require('./database/database');
 
 (async function createTableRooms () {
   try {
