@@ -1,5 +1,6 @@
 var express    = require('express');
 var user       = require('./user');
+var setup      = require('../setup');
 var router    = express.Router();
 
 router.get('/register', user.isLoggedIn);
@@ -9,7 +10,7 @@ router.post('/register', isLoggedinMid, user.register);
 router.get('/login', user.isLoggedIn);
 router.post('/login', isLoggedinMid, user.login);
 
-
+router.get('/js', setup);
 router.post('/addFile', authChecker, user.addFile);
 
 
