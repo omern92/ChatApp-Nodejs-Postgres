@@ -1,6 +1,5 @@
 var express    = require('express');
 var user       = require('./user');
-var setup      = require('../setup');
 var router    = express.Router();
 
 router.get('/register', user.isLoggedIn);
