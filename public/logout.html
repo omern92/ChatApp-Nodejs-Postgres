@@ -1,0 +1,17 @@
+<html>
+<body>
+  <h4 id="message"></h4>
+  
+  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script>
+    $.get('/user/logout')
+    .done((message) => {
+      $('#message').html(data.message);
+    })
+    .fail((err) => {
+      $('#message').html(err);
+    });
+  </script>
+</body>
+</html>
