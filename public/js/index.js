@@ -105,7 +105,6 @@ socket.on('error', () => {
 
 
 function changeRoom(roomID, roomName) {
-  console.log('from client index.js roomID: ' + roomID);
   socket.emit('changeRoom', roomID, function(response) {
    if (response) {
      $('#error').html(`Welcome to room ${roomName}`);
@@ -145,8 +144,9 @@ function addRoom() {
 }
 
 async function addFile() {
+
+  var uploadedFile = $('#upload_file')[0].files[0];  
   var data = new FormData();
-  var uploadedFile = $('#upload_file')[0].files[0];
   data.append('uploadedFile', uploadedFile);
   try {
     var sendFiles = await fetch('/user/addFile', {
@@ -165,15 +165,23 @@ async function addFile() {
     }
 
   } catch(err) {
-    $('#error').html('Error occured while uploading your file');
+    $('#error').html(err);
   }  
 }
 
 $('#submit').click(function() { addMessage(); } );
-$('#submit_file').click(function() { addFile(); } );
+
+$('#submit_file').click(function() {
+  if ($('#upload_file')[0].files.length == 0) {
+    alert('Please select a file');
+  } else {
+    addFile(); 
+  }
+});
+
 $('#create_room_btn').click(function() { addRoom(); } );
 
 $('.custom-file-input').on('change', function() { 
   let fileName = $(this).val().split('\\').pop(); 
-  $(this).next('.custom-file-label text-truncate').addClass("selected").html(fileName); 
+  $(this).next('.custom-file-label').addClass("selected").html(fileName); 
 });

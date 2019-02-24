@@ -23,6 +23,7 @@ io.on('connection', (socket) => {
 
   socket.on('addMessage', async (message, fn) => {
     try {
+      const roomID = socket.request.session.room;
       let response = await mapper.addMessage(username, message, roomID);
       if (response === true) {
         io.in(roomID).emit('newMessage', { time: new Date().toLocaleTimeString(), user: username, mess: message });
@@ -30,7 +31,7 @@ io.on('connection', (socket) => {
       }
 
     } catch(e) {
-      fn({ success: false, message: 'DB error.' });
+      fn({ success: false, message: 'Connection error.' });
     }
   });
 
@@ -46,7 +47,7 @@ io.on('connection', (socket) => {
       else  fn({ success: false, message: 'Room already exists.' });
 
     } catch(e) {
-            fn({ success: false, message: 'DB error.' });
+            fn({ success: false, message: 'Connection error.' });
     }
 
   });

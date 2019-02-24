@@ -21,7 +21,7 @@ $(document).ready(function () {
         }
       })
       .fail(function() {
-        $('#error').html('An Error occured while processing your request. Please try again.');
+        $('#error').html('An Error occured while processing your request. Please try again later.');
       });
     }
     else if (!validateUsername(username)) {

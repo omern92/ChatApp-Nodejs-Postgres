@@ -12,6 +12,9 @@ module.exports = Object.freeze({
   FIELDS_REQ: 'Please fill in all the fields.',
 
   // Chat messages:
-  NO_MESSAGES: 'No messages to display yet. Be the first!'
+  NO_MESSAGES: 'No messages to display yet. Be the first!',
+
+  //Connection:
+  CONN_ERROR: 'Connection Error'
 });
 

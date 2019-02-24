@@ -12,7 +12,7 @@ router.post('/login', isLoggedinMid, user.login);
 router.post('/addFile', authChecker, user.addFile);
 
 
-router.get('/logout', authChecker, user.logout);
+router.get('/logout', user.logout);
 
 
 

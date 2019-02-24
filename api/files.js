@@ -1,10 +1,5 @@
 var express    = require('express');
 var path       = require('path');
-var formidable = require('formidable');
-var path       = require('path');
-var uuidv1     = require('uuid/v1');
-var File       = require('../classes/fileClass');
-var userMapper = require('../database/userFunctions');
 
 var router    = express.Router();
 

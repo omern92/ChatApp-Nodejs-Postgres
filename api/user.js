@@ -1,28 +1,26 @@
 var mapper     = require('../database/staticFunctions');
+var userMapper     = require('../database/userFunctions');
 var constants  = require('../constants');
-
+var formidable = require('formidable');
+var uuidv1     = require('uuid/v1');
+var File       = require('../classes/fileClass');
+var path       = require('path');
+var fs         = require('fs');
 
 async function register(req, res) {
   var username = req.body.username;
   var password = req.body.password;
-  if (validateUsername(username) && validatePass(password)) {
-    try {
-      let response = await mapper.isUsernameFree(username);
-      if (response === false) {
-        res.json({ result: false, message: constants.REG_USERNAME_EXISTS });
-      } else {
-        response = await mapper.register(username, password);
+  const validated = await validateCred(username, password);
+  if (validated.result === false) {
+        res.json({ result: false, message: validated.message });  
+  } 
+  else {
+    const response = await mapper.register(username, password);
+    if (response) {
         res.json({ result: true, message: constants.REG_SUCCESS });
-      }
-
-    } catch(err) {
-      res.status(500).json({ result: false, message: constants.DB_ERROR });
-    }
-
-  } else if (!validateUsername(username)) {
-    res.json({ result: false, message: constants.REG_INVALID_USERNAME });
-  } else if (!validatePass(password)) {
-    res.json({ result: false, message: constants.REG_INVALID_PASS });
+    } else {
+        res.json({ result: false, message: constants.DB_ERROR });
+     }
   }
 }
 
@@ -38,36 +36,44 @@ async function login(req, res) {
     if ( response.success ) {
       req.session.username = username;
       req.session.room     = response.room;
-      console.log('The sessions saved successfully. room session: ' + req.session.room)
       res.json({ result: true, message: constants.LOGIN_SUCCESS });
     } else {
       res.json({ result: false, message: response });
     }
 
   } catch(err) {
-    res.json({ result: false, message: constants.DB_ERROR });
+    res.json({ result: false, message: constants.CONN_ERROR });
   }
 }
 
 
-function addFile(req, res) {
+async function addFile(req, res) {
   var form = new formidable.IncomingForm();
   form.maxFileSize = 5 * 1024 * 1024;
   form.parse(req);
 
   form.on('fileBegin', (name, file) => {
       const genName = uuidv1();
-      file.path = path.join(__dirname, 'uploads', genName);
+      const uploadsPath = path.join(__dirname, 'uploads');
+      const filePath = path.join(__dirname, 'uploads', genName);
+
+      fs.access(uploadsPath, (err) => {
+        if (err)
+          fs.mkdirSync(uploadsPath);
+      });
+      file.path = filePath;
   });
 
-  form.on('file', (name, file) => {
+  form.on('file', async (name, file) => {
     const username = req.session.username;
     const genName = path.basename(file.path);
-    userMapper.saveFile(username, genName, file)
-      .catch(err => res.status(500).json({ message: constants.DB_ERROR }));
+    let response = await userMapper.saveFile(username, genName, file);
+    if (!response) {
+      res.status(500).json({ message: response })
+    } 
     
     newFile = new File(username, genName, file);
-    const response = newFile.isImage();
+    response = newFile.isImage();
     if (response) {
       res.json(response);
     } else {
@@ -77,13 +83,41 @@ function addFile(req, res) {
 }
 
 
+async function validateCred(username, password) {
+  if (validateUsername(username) && validatePass(password)) {
+    try {
+      let response = await mapper.isUsernameFree(username);
+      if (response === false) 
+        return { result: false, message: constants.REG_USERNAME_EXISTS };
+      else if (response === true)
+        return { result: true }; // username available.
+      else
+        return { result: false, message: constants.DB_ERROR };
+
+    } catch(err) {
+      return { result: false, message: constants.CONN_ERROR };
+    }
+
+  } else if (!validateUsername(username)) 
+      return { result: false, message: constants.REG_INVALID_USERNAME };
+   else if (!validatePass(password)) 
+      return { result: false, message: constants.REG_INVALID_PASS };
+  
+}
+
+
 function logout(req, res) {
-  req.session.destroy((err) => {
-    if (err)
-      res.status(500).json(err);
-    else 
-      res.status(200).json({ message: 'disconnected successfully' });
-  })
+  if (req.session.username) {
+    req.session.destroy((err) => {
+      if (err)
+        res.status(200).json(err);
+      else 
+        res.status(200).json({ message: 'disconnected successfully' });
+    });
+  } else {
+    res.status(200).json({ message: 'You are not logged in' });
+  }
+
 }
 
 
