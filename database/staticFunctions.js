@@ -25,9 +25,7 @@ module.exports = {
       if (result.rows.length > 0){
         return false;
       }
-      else {
-        return true; 
-      }
+      return true; 
 
     } catch(err) {
       console.log(err.stack);
